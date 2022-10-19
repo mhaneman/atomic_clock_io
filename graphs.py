@@ -1,18 +1,29 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import asyncio
 
-x = np.linspace(0, 6*np.pi, 100)
-y = np.sin(x)
+"""
+potential implementation of an async matplotlib graph
 
-plt.ion()
+"""
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-line1, = ax.plot(x, y, 'r-') # Returns a tuple of line objects, thus the comma
+async def get_new_data():
+    await asyncio.sleep(10)
+    return np.random.randint(10)
 
-phase = 0
-while True:
-    line1.set_ydata(np.sin(x + phase))
-    fig.canvas.draw()
-    fig.canvas.flush_events()
-    phase += 0.1
+async def live_graph():
+    x_data = [0]
+    y_data = [0]
+
+    plt.ion()
+    fig = plt.figure()
+    while True:
+        y_data.append(await get_new_data())
+        x_data.append(x_data[-1] + 1)
+        plt.scatter(x=x_data, y=y_data)
+        fig.canvas.draw()
+        fig.canvas.flush_events()
+
+
+if __name__ == "__main__":
+    asyncio.run(live_graph())
